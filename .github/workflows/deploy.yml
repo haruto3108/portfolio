@@ -1,0 +1,43 @@
+# main に push したら GitHub Pages に自動デプロイする。
+#
+# 初回だけ GitHub 側の設定が必要:
+#   リポジトリの Settings → Pages → Build and deployment → Source を
+#   「GitHub Actions」にする（「Deploy from a branch」ではない）
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  # 手元から手動で流したいとき用
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# デプロイが重なると公開内容が前後するので、1本ずつ流す。
+# ただし走っている分を止めはしない（途中で切ると中途半端な状態で公開されうる）
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # npm install → astro build → artifact のアップロードまでやってくれる
+      - uses: withastro/action@v3
+        with:
+          node-version: 24
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

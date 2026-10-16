@@ -1,0 +1,302 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection, render } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+
+import Base from '../../layouts/Base.astro';
+import { href } from '../../lib/url';
+
+export const getStaticPaths = (async () => {
+  const works = (await getCollection('works', ({ data }) => import.meta.env.DEV || !data.draft)).sort(
+    (a, b) => a.data.order - b.data.order,
+  );
+
+  // 記事下の「前の作品 / 次の作品」に使うため、並び順の前後を一緒に渡す
+  return works.map((work, index) => ({
+    params: { id: work.id },
+    props: {
+      work,
+      prev: works[index - 1],
+      next: works[index + 1],
+    },
+  }));
+}) satisfies GetStaticPaths;
+
+const { work, prev, next } = Astro.props;
+const { title, tagline, tags, links, cover, coverAlt } = work.data;
+const { Content } = await render(work);
+---
+
+<Base title={title} description={`${title} — ${tagline}`}>
+  <article class="work">
+    <div class="container">
+      <a class="back" href={href('/#works')}>← 作品一覧</a>
+
+      <header class="head">
+        <h1 class="title">{title}</h1>
+        <p class="tagline">{tagline}</p>
+
+        {/* 担当や期間は本文の「## 担当」側に書く。ここでは技術スタックだけ並べる */}
+        <ul class="tags head-tags">
+          {tags.map((tag) => <li class="tag">{tag}</li>)}
+        </ul>
+
+        {
+          links.length > 0 && (
+            <ul class="links">
+              {links.map((link) => (
+                <li>
+                  <a class="link" href={link.url}>
+                    {link.label} ↗
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )
+        }
+      </header>
+
+      {
+        cover && (
+          <figure class="cover">
+            <Image src={cover} alt={coverAlt ?? ''} widths={[640, 1024, 1600]} loading="eager" />
+          </figure>
+        )
+      }
+
+      <div class="prose">
+        <Content />
+      </div>
+
+      {
+        (prev || next) && (
+          <nav class="pager" aria-label="ほかの作品">
+            {prev ? (
+              <a class="pager-link" href={href(`/works/${prev.id}`)}>
+                <span class="pager-label">前の作品</span>
+                <span class="pager-title">{prev.data.title}</span>
+              </a>
+            ) : (
+              <span />
+            )}
+            {next && (
+              <a class="pager-link pager-next" href={href(`/works/${next.id}`)}>
+                <span class="pager-label">次の作品</span>
+                <span class="pager-title">{next.data.title}</span>
+              </a>
+            )}
+          </nav>
+        )
+      }
+    </div>
+  </article>
+</Base>
+
+<style>
+  .work {
+    padding-block: 2.5rem 0;
+  }
+
+  .back {
+    display: inline-block;
+    margin-bottom: 2rem;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--fg-muted);
+    text-decoration: none;
+  }
+
+  .back:hover {
+    color: var(--accent);
+  }
+
+  .head {
+    max-width: var(--width-prose);
+  }
+
+  .title {
+    margin: 0 0 0.625rem;
+    font-size: clamp(1.75rem, 5vw, 2.75rem);
+  }
+
+  .tagline {
+    margin: 0 0 2rem;
+    font-size: clamp(1rem, 2.5vw, 1.125rem);
+    color: var(--fg-muted);
+  }
+
+  .head-tags {
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 1.75rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .link {
+    display: inline-block;
+    padding: 0.45rem 1.1rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    font-size: 0.875rem;
+    text-decoration: none;
+  }
+
+  .link:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .cover {
+    margin: clamp(2.5rem, 6vw, 4rem) 0 0;
+  }
+
+  .cover :global(img) {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+  }
+
+  /* ------------------------------------------------------------- 本文（Markdown） */
+
+  .prose {
+    max-width: var(--width-prose);
+    margin-top: clamp(2.5rem, 6vw, 3.5rem);
+  }
+
+  .prose :global(h2) {
+    margin: 3rem 0 1rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    font-size: clamp(1.25rem, 3.5vw, 1.5rem);
+  }
+
+  .prose :global(h3) {
+    margin: 2.25rem 0 0.75rem;
+    font-size: 1.0625rem;
+    color: var(--accent);
+  }
+
+  .prose :global(p) {
+    margin: 0 0 1.25rem;
+  }
+
+  .prose :global(ul),
+  .prose :global(ol) {
+    margin: 0 0 1.25rem;
+    padding-left: 1.25em;
+  }
+
+  .prose :global(li) {
+    margin-bottom: 0.4rem;
+  }
+
+  .prose :global(li::marker) {
+    color: var(--fg-faint);
+  }
+
+  .prose :global(strong) {
+    /* 太字だけだと和文では目立ちにくいので、下に薄い帯を敷いて拾いやすくする */
+    font-weight: 700;
+    background: linear-gradient(transparent 62%, var(--accent-soft) 62%);
+  }
+
+  .prose :global(code) {
+    padding: 0.1em 0.35em;
+    border-radius: 0.25rem;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+  }
+
+  .prose :global(pre) {
+    margin: 0 0 1.5rem;
+    padding: 1rem 1.25rem;
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-elev);
+  }
+
+  .prose :global(pre code) {
+    padding: 0;
+    border: 0;
+    background: none;
+  }
+
+  .prose :global(img) {
+    margin: 1.5rem 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  .prose :global(blockquote) {
+    margin: 0 0 1.25rem;
+    padding-left: 1rem;
+    border-left: 3px solid var(--border-strong);
+    color: var(--fg-muted);
+  }
+
+  /* ----------------------------------------------------------------- ページ送り */
+
+  .pager {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: clamp(3rem, 8vw, 5rem);
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .pager-link {
+    display: block;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    text-decoration: none;
+  }
+
+  .pager-link:hover {
+    border-color: var(--border-strong);
+    background: var(--bg-elev);
+  }
+
+  .pager-next {
+    grid-column: 2;
+    text-align: right;
+  }
+
+  .pager-label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.06em;
+    color: var(--fg-faint);
+    text-transform: uppercase;
+  }
+
+  .pager-title {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.9375rem;
+    font-weight: 500;
+  }
+
+  @media (width < 32rem) {
+    .pager {
+      grid-template-columns: 1fr;
+    }
+
+    .pager-next {
+      grid-column: 1;
+      text-align: left;
+    }
+  }
+</style>

@@ -1,0 +1,14 @@
+# ビルド成果物
+dist/
+.astro/
+
+# 依存
+node_modules/
+
+# 環境変数
+.env
+.env.production
+
+# OS / エディタ
+.DS_Store
+*.log

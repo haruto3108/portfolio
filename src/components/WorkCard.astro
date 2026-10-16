@@ -1,0 +1,164 @@
+---
+/**
+ * 作品一覧のカード1枚。画像を大きく取り、横に概要を置く。
+ * スマホでは縦積みになる。
+ */
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import { href } from '../lib/url';
+
+interface Props {
+  work: CollectionEntry<'works'>;
+  /** 一覧の何番目か。01 / 02 と番号を振るのに使う */
+  index: number;
+}
+
+const { work, index } = Astro.props;
+const { title, tagline, tags, cover, coverAlt } = work.data;
+const url = href(`/works/${work.id}`);
+const number = String(index + 1).padStart(2, '0');
+---
+
+<article class="card">
+  <a class="media" href={url} aria-hidden="true" tabindex="-1">
+    {
+      cover ? (
+        <Image src={cover} alt={coverAlt ?? ''} widths={[480, 800, 1200]} loading="lazy" />
+      ) : (
+        /* スクショを入れるまでの仮置き。空白のままだとレイアウトが崩れて見えるため */
+        <span class="placeholder">
+          <span class="placeholder-num">{number}</span>
+          <span class="placeholder-note">スクリーンショット未設定</span>
+        </span>
+      )
+    }
+  </a>
+
+  <div class="body">
+    <p class="num">{number}</p>
+
+    <h3 class="title">
+      <a href={url}>{title}</a>
+    </h3>
+
+    <p class="tagline">{tagline}</p>
+
+    <ul class="tags">
+      {tags.map((tag) => <li class="tag">{tag}</li>)}
+    </ul>
+
+    <p class="more" aria-hidden="true">詳しく見る →</p>
+  </div>
+</article>
+
+<style>
+  .card {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: clamp(1.25rem, 4vw, 2.5rem);
+    align-items: center;
+    padding-block: clamp(1.75rem, 4vw, 2.75rem);
+    border-top: 1px solid var(--border);
+  }
+
+  @media (width < 48rem) {
+    .card {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .media {
+    display: block;
+    overflow: hidden;
+    /* 画像枠そのものもリンクなので、中のプレースホルダ文字に下線が出ないよう消す */
+    text-decoration: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--bg-elev);
+    /* 画像の縦横比が違っても一覧の見た目が揃うように枠を固定する */
+    aspect-ratio: 16 / 10;
+  }
+
+  .media :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+
+  .card:hover .media :global(img) {
+    transform: scale(1.03);
+  }
+
+  .placeholder {
+    display: grid;
+    place-content: center;
+    gap: 0.25rem;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--accent-soft), var(--bg-elev));
+    text-align: center;
+  }
+
+  .placeholder-num {
+    font-family: var(--font-mono);
+    font-size: 2.5rem;
+    font-weight: 500;
+    color: var(--accent);
+    opacity: 0.5;
+  }
+
+  .placeholder-note {
+    font-size: 0.75rem;
+    color: var(--fg-faint);
+  }
+
+  .num {
+    margin: 0 0 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+  }
+
+  .title {
+    margin: 0 0 0.5rem;
+    font-size: clamp(1.25rem, 3vw, 1.625rem);
+  }
+
+  .title a {
+    text-decoration: none;
+  }
+
+  /* カードのどこを押しても詳細に飛べるようにする。
+     リンクはタイトルの <a> 1つだけにして、残りはこの擬似要素で覆う
+     （同じリンクが3つ並ぶとスクリーンリーダーで冗長になるため） */
+  .title a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .card {
+    position: relative;
+  }
+
+  .tagline {
+    /* 担当の行を消したぶん、ここでタグとの間隔を確保する */
+    margin: 0 0 0.875rem;
+    color: var(--fg-muted);
+  }
+
+  .more {
+    margin: 1rem 0 0;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--accent);
+  }
+
+  .card:hover .more {
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+</style>

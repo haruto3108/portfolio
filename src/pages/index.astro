@@ -1,0 +1,421 @@
+---
+import { getCollection } from 'astro:content';
+
+import Base from '../layouts/Base.astro';
+import WorkCard from '../components/WorkCard.astro';
+import { profile, skillLevelLabel } from '../data/profile';
+import { href } from '../lib/url';
+
+// draft: true の作品は本番では出さない。開発中（astro dev）では確認したいので出す
+const works = (await getCollection('works', ({ data }) => import.meta.env.DEV || !data.draft)).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+
+// 空文字のリンクは表示しない（公開したくない連絡先を profile.ts で空にできる作り）
+const contactLinks = [
+  { label: 'GitHub', value: profile.links.github, text: '@haruto3108' },
+  { label: 'Email', value: profile.links.email ? `mailto:${profile.links.email}` : '', text: profile.links.email },
+  { label: 'X', value: profile.links.x, text: profile.links.x.replace(/^https?:\/\//, '') },
+  { label: 'Zenn', value: profile.links.zenn, text: profile.links.zenn.replace(/^https?:\/\//, '') },
+].filter((link) => link.value !== '');
+---
+
+<Base description={profile.summary}>
+  {/* ------------------------------------------------------------------ Hero */}
+  <section class="hero">
+    <div class="container">
+      <div class="avatar-wrap">
+        {/*
+          アイコンはドット絵なので、320pxの原寸をそのまま置いて CSS で半分に出す。
+          alt を空にしているのは、すぐ下にハンドル名が文字で続くため
+          （読み上げで「haruto3108 のアイコン / haruto3108」と二重に聞こえるのを避ける）
+        */}
+        <img
+          class="avatar"
+          src={href(`/${profile.avatar}`)}
+          width="320"
+          height="320"
+          alt=""
+          fetchpriority="high"
+        />
+
+        {/*
+          あいさつの吹き出し。両方のテキストをHTMLに出しておき、
+          <html data-visit="return"> が付いているかどうかで CSS がどちらかを隠す。
+          属性を付けるのは head のインラインスクリプト（描画前に走る）なので、
+          2回目以降の訪問で「はじめまして」が一瞬見えることがない。
+          JSが無い環境では属性が付かず、初回扱いの「はじめまして」が出る
+        */}
+        <p class="bubble">
+          <span class="greet greet-first">はじめまして</span>
+          <span class="greet greet-return">こんにちは</span>
+        </p>
+      </div>
+
+      <h1 class="hero-name">{profile.name}</h1>
+      <p class="hero-intro">{profile.intro}</p>
+    </div>
+  </section>
+
+  {/* ----------------------------------------------------------------- Works */}
+  <section id="works" class="section">
+    <div class="container">
+      {/*
+        見出しは「WORKS」だけ。小見出しの見た目のまま h2 にしてあるのは、
+        画面上は1語でも、文書構造としての見出しは残したいため
+        （読み上げの見出しジャンプと検索エンジンの両方で効く）
+      */}
+      <h2 class="eyebrow">Works</h2>
+
+      <div class="works" data-astro-prefetch="viewport">
+        {works.map((work, index) => <WorkCard work={work} index={index} />)}
+      </div>
+    </div>
+  </section>
+
+  {/* ----------------------------------------------------------------- About */}
+  <section id="about" class="section">
+    <div class="container">
+      <p class="eyebrow">02 — About</p>
+      <h2 class="section-title">できること</h2>
+
+      <div class="about">
+        <div class="about-text">
+          <p>{profile.about}</p>
+          <dl class="facts">
+            {profile.school && (
+              <>
+                <dt>所属</dt>
+                <dd>{profile.school}{profile.department ? ` ${profile.department}` : ''}</dd>
+              </>
+            )}
+            {profile.location && (
+              <>
+                <dt>所在地</dt>
+                <dd>{profile.location}</dd>
+              </>
+            )}
+          </dl>
+        </div>
+
+        <div class="skills">
+          {
+            profile.skills.map((group) => (
+              <div class="skill-group">
+                <h3 class="skill-title">{group.group}</h3>
+                <ul class="skill-list">
+                  {group.items.map((item) => (
+                    <li class="skill-item">
+                      <span class="skill-name">{item.name}</span>
+                      <span class={`skill-level level-${item.level}`}>
+                        {skillLevelLabel[item.level]}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* --------------------------------------------------------------- Contact */}
+  <section id="contact" class="section">
+    <div class="container">
+      <p class="eyebrow">03 — Contact</p>
+      <h2 class="section-title">連絡先</h2>
+      <p class="section-lead">
+        作ったものは GitHub で公開しています。ご連絡は下記からお願いします。
+      </p>
+
+      <ul class="contact">
+        {
+          contactLinks.map((link) => (
+            <li class="contact-item">
+              <span class="contact-label">{link.label}</span>
+              <a href={link.value}>{link.text}</a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* ------------------------------------------------------------------- Hero */
+
+  .hero {
+    /*
+      下の余白は 0 にして、Works 側の padding（--space-section）だけで間を作る。
+      中身がアイコンと2行だけなので、両方から空けると間延びして見える
+    */
+    padding-block: clamp(2.5rem, 8vh, 4.5rem) 0;
+    text-align: center;
+  }
+
+  /*
+    アイコンの丸枠。吹き出しの位置の基準にもなるので position: relative を持たせる。
+    枠からはみ出させたいので overflow は切らない
+  */
+  .avatar-wrap {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    /* アイコンの背景が透明なので、下地を敷かないと背景に溶ける */
+    background: var(--bg-elev);
+  }
+
+  .avatar {
+    /*
+      320px の原寸をちょうど半分で出す。ドット絵は整数分の1でないと
+      1ドットが2pxと3pxに割れてガタつくので、可変にせず固定値にしている
+    */
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    /* 既定の補間を切って、ドットの輪郭を保つ */
+    image-rendering: pixelated;
+  }
+
+  .bubble {
+    position: absolute;
+    bottom: 74%;
+    left: 76%;
+    margin: 0;
+    padding: 0.35rem 0.9rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 1.125rem;
+    background: var(--bg-elev);
+    box-shadow: var(--shadow);
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.7;
+    /* 短い挨拶なので折り返さない。折り返すと吹き出しの形が崩れる */
+    white-space: nowrap;
+    /* アイコンから生えてくるように見せる */
+    transform-origin: bottom left;
+    animation: bubble-in 0.45s cubic-bezier(0.18, 0.89, 0.32, 1.28) 0.3s both;
+  }
+
+  /* 吹き出しのしっぽ。小さい四角を45度回して、下辺の2辺だけ線を残す */
+  .bubble::after {
+    content: '';
+    position: absolute;
+    left: 1rem;
+    bottom: -0.3rem;
+    width: 0.55rem;
+    height: 0.55rem;
+    background: var(--bg-elev);
+    border-right: 1px solid var(--border-strong);
+    border-bottom: 1px solid var(--border-strong);
+    transform: rotate(45deg);
+  }
+
+  /*
+    スマホ幅では、既定の位置（アイコンの右上）のままだと
+    「はじめまして」の分だけ画面右端をはみ出して横スクロールが出る。
+    アイコンに重なる側へ寄せ、文字も一段小さくして収める
+  */
+  @media (width < 26rem) {
+    .bubble {
+      left: 58%;
+      padding: 0.3rem 0.75rem;
+      font-size: 0.8125rem;
+    }
+  }
+
+  @keyframes bubble-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.4rem) scale(0.88);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /*
+    あいさつの出し分け。既定は「はじめまして」で、
+    2回目以降（head のスクリプトが data-visit="return" を付けたとき）だけ入れ替える。
+    JSが無い環境では属性が付かないので、初回の挨拶が出る
+  */
+  .greet-return {
+    display: none;
+  }
+
+  :global(:root[data-visit='return']) .greet-first {
+    display: none;
+  }
+
+  :global(:root[data-visit='return']) .greet-return {
+    display: inline;
+  }
+
+  .hero-name {
+    margin: 0 0 0.625rem;
+    /* GitHub のIDなので、等幅で出したほうが「ハンドル名」だと伝わる */
+    font-family: var(--font-mono);
+    font-size: clamp(1.625rem, 6vw, 2.25rem);
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+
+  .hero-intro {
+    margin: 0;
+    font-size: 0.9375rem;
+    color: var(--fg-muted);
+    /*
+      日本語は既定だと文字のどこででも改行されるので、320px 幅だと
+      「…電子情報工学 / 科」と最後の1文字だけが次の行に落ちてしまう。
+      keep-all で、空白を入れたところでだけ折り返すようにする
+    */
+    word-break: keep-all;
+    /* keep-all のままだと、語が画面幅より長いときにはみ出す。そのときだけ折る */
+    overflow-wrap: anywhere;
+  }
+
+  /* --------------------------------------------------------------- セクション */
+
+  .section {
+    padding-block: var(--space-section) 0;
+  }
+
+  .section-title {
+    margin: 1rem 0 0.75rem;
+    font-size: clamp(1.5rem, 4vw, 2rem);
+  }
+
+  .section-lead {
+    max-width: var(--width-prose);
+    margin: 0;
+    color: var(--fg-muted);
+  }
+
+  .works {
+    margin-top: 2rem;
+    /* カードの区切り線が最後にも入ると床が抜けて見えるので、最後だけ下線を足して閉じる */
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ------------------------------------------------------------------ About */
+
+  .about {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    gap: clamp(2rem, 6vw, 4rem);
+    margin-top: 2rem;
+  }
+
+  @media (width < 48rem) {
+    .about {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .about-text p {
+    max-width: var(--width-prose);
+    margin: 0;
+    color: var(--fg-muted);
+  }
+
+  .facts {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.5rem 1.25rem;
+    margin: 1.75rem 0 0;
+    font-size: 0.9375rem;
+  }
+
+  .facts dt {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    color: var(--fg-faint);
+    /* ラベルと値のベースラインを合わせる */
+    padding-top: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .facts dd {
+    margin: 0;
+  }
+
+  .skill-group + .skill-group {
+    margin-top: 1.5rem;
+  }
+
+  .skill-title {
+    margin: 0 0 0.5rem;
+    font-size: 0.8125rem;
+    font-family: var(--font-mono);
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--fg-faint);
+    text-transform: uppercase;
+  }
+
+  .skill-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .skill-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding-block: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .skill-name {
+    font-size: 0.9375rem;
+  }
+
+  .skill-level {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: var(--fg-faint);
+  }
+
+  /* 「主に使った」だけ色を付けて、強みがひと目で分かるようにする */
+  .level-main {
+    color: var(--accent);
+  }
+
+  /* ---------------------------------------------------------------- Contact */
+
+  .contact {
+    margin: 2rem 0 0;
+    padding: 0;
+    list-style: none;
+    max-width: var(--width-prose);
+  }
+
+  .contact-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem 1.5rem;
+    padding-block: 0.875rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .contact-label {
+    min-width: 5rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    color: var(--fg-faint);
+    text-transform: uppercase;
+  }
+</style>

@@ -1,0 +1,227 @@
+/*
+ * サイト全体の土台。色・間隔・文字は全部ここのカスタムプロパティを経由する。
+ * 個別のページで色を直書きしないこと（ライト/ダークの両方を直し忘れる事故が起きる）。
+ */
+
+/* ---------------------------------------------------------------- トークン */
+
+:root {
+  /* 色：ライト。
+     和文を長く読ませるので背景は純白より少し落とし、本文は純黒を避けて目の負担を下げる */
+  --bg: #fbfbfa;
+  --bg-elev: #ffffff;
+  --fg: #16181d;
+  --fg-muted: #5b6270;
+  --fg-faint: #8a909c;
+  --border: #e3e4e8;
+  --border-strong: #c9ccd3;
+  --accent: #0f766e;
+  --accent-fg: #ffffff;
+  --accent-soft: #e4f1ef;
+  --shadow: 0 1px 2px rgb(16 24 40 / 6%), 0 8px 24px -12px rgb(16 24 40 / 12%);
+
+  /* 文字：和文はOS標準に任せる。
+     日本語のWebフォントは subset を分けても数百KB級になり、
+     「表示が速い」ことのほうが採用側に見てもらううえで効くと判断した。
+     欧文の見出しラベルと数字だけ JetBrains Mono を読み込む（latin のみ・約20KB）。 */
+  --font-sans: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic Medium', 'Yu Gothic',
+    'Noto Sans JP', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  /* 余白：4の倍数で揃える。セクション間だけ大きく空けてリズムを作る */
+  --space-section: clamp(4.5rem, 10vw, 8rem);
+  --radius: 0.75rem;
+  --radius-lg: 1.25rem;
+
+  /* 幅：本文は一行45〜50文字に収まるくらいが日本語だと読みやすい */
+  --width-page: 72rem;
+  --width-prose: 44rem;
+}
+
+/* ダークは「OSの設定」を既定にしつつ、ヘッダーのトグルで上書きできるようにする。
+   data-theme が付いていればそれが勝つ（Base.astro の先頭スクリプトが付ける）。 */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #0e1013;
+    --bg-elev: #171a1f;
+    --fg: #e9eaee;
+    --fg-muted: #a1a8b5;
+    --fg-faint: #6f7682;
+    --border: #272b32;
+    --border-strong: #3a3f49;
+    --accent: #5eead4;
+    --accent-fg: #0b1f1c;
+    --accent-soft: #14302c;
+    --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 8px 24px -12px rgb(0 0 0 / 60%);
+  }
+}
+
+:root[data-theme='dark'] {
+  --bg: #0e1013;
+  --bg-elev: #171a1f;
+  --fg: #e9eaee;
+  --fg-muted: #a1a8b5;
+  --fg-faint: #6f7682;
+  --border: #272b32;
+  --border-strong: #3a3f49;
+  --accent: #5eead4;
+  --accent-fg: #0b1f1c;
+  --accent-soft: #14302c;
+  --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 8px 24px -12px rgb(0 0 0 / 60%);
+}
+
+/* ------------------------------------------------------------ リセット最小限 */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  /* ヘッダー分を見込んで、アンカーで飛んだときに見出しが隠れないようにする */
+  scroll-padding-top: 5rem;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.8;
+  /* 和文の字面を少し締める。欧文だけのサイトより詰めたほうが整って見える */
+  letter-spacing: 0.01em;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+img,
+picture,
+video,
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: inherit;
+  text-decoration-color: var(--border-strong);
+  text-underline-offset: 0.25em;
+}
+
+a:hover {
+  text-decoration-color: var(--accent);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  line-height: 1.4;
+  font-weight: 700;
+  /* 大きい見出しは字間を詰めたほうが締まる */
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+ul,
+ol {
+  padding-left: 1.25em;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* 動きを減らす設定の人には、動かさない。装飾なので無くても情報は伝わる */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------------------------------------------------------------- 共通部品 */
+
+/* ページの左右余白。スマホでも端にくっつかないよう最低16px確保する */
+.container {
+  width: 100%;
+  max-width: var(--width-page);
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 5vw, 2.5rem);
+}
+
+/* セクション見出しの上に置く「01 WORKS」みたいな小さいラベル */
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+}
+
+.eyebrow::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* 技術スタックなどのタグ */
+.tag {
+  display: inline-block;
+  padding: 0.15em 0.6em;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg-elev);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1.7;
+  color: var(--fg-muted);
+  white-space: nowrap;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0;
+  list-style: none;
+}
+
+/* スクリーンリーダー向けにだけ残したいテキスト */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
