@@ -26,19 +26,77 @@ export const profile = {
     '文化祭の展示用に Unity で4人対戦のマルチプレイゲームを個人開発しました。' +
     '動くものを最後まで仕上げて、人に使ってもらうところまでやるのが好きです。',
 
-  // About セクションの本文。説明文（summary）が「何を作ったか」なので、
-  // こちらは「どう作るか（仕事の進め方）」を書いて重複を避ける
-  about:
-    'Web とゲームの両方を触っていますが、どちらでも気をつけているのは' +
-    '「あとから読む人が分かる状態で残すこと」です。' +
-    '要件とデザインの決めごとを先にドキュメントにしてから実装に入り、' +
-    'コードのコメントには何をしているかではなく、なぜそうしたかを書くようにしています。' +
-    '翌年の代に引き継ぐ前提のサイトや、初めて触る人がその場で遊ぶゲームを作るなかで、この進め方になりました。',
-
-  // 就活でよく聞かれる基本情報。空文字にすると非表示
-  school: '鈴鹿工業高等専門学校',
-  department: '電子情報工学科（I科） 本科4年',
-  location: '三重県鈴鹿市',
+  /**
+   * 経歴と実績。About セクションに、書いた順（古い順）でそのまま並ぶ。
+   *
+   *  date     … 'YYYY-MM'。<time datetime> にそのまま入れるのでこの形を崩さないこと
+   *  grade    … そのときの学年。空にすればその行だけ出ない
+   *  team     … チーム名。個人戦のものは空にする
+   *  url      … 順位や合格が確認できるページ。空にするとリンクは出ない
+   *  urlLabel … リンクの文言。空なら「結果を見る」になる
+   */
+  achievements: [
+    {
+      date: '2023-04',
+      grade: '高専1年',
+      title: '鈴鹿工業高等専門学校 電子情報工学科 入学',
+      team: '',
+      url: '',
+      urlLabel: '',
+    },
+    {
+      date: '2024-07',
+      grade: '高専2年',
+      title: 'パソコン甲子園 モバイル部門 本戦出場',
+      team: '栗まんじゅう一丁目',
+      url: '', // TODO: 本選出場チームの紹介ページ（公開URLが見つからなかった）
+      urlLabel: '',
+    },
+    {
+      date: '2024-09',
+      grade: '高専2年',
+      title: 'パソコン甲子園 プログラミング部門 85位',
+      team: '炎攻撃の肉壁BROS',
+      url: '', // TODO: 順位が載っているページ（公開URLが見つからなかった）
+      urlLabel: '',
+    },
+    {
+      date: '2025-01',
+      grade: '高専2年',
+      title: '鈴鹿高専ビジネスコンテスト 企業賞',
+      team: 'あ',
+      url: '', // TODO: 受賞が分かるページ
+      urlLabel: '',
+    },
+    {
+      // TODO: 合格月が未確定。「2025年前半」とのことなので 3月で仮置きしている。
+      //       4月以降なら grade を '高専3年' に直すこと
+      date: '2025-03',
+      grade: '高専2年',
+      title: '基本情報技術者試験 合格',
+      team: '',
+      // 個人の合格を公開しているページは基本的に無いので、ここは空のままになる見込み
+      url: '',
+      urlLabel: '',
+    },
+    {
+      date: '2025-09',
+      grade: '高専3年',
+      title: 'パソコン甲子園 プログラミング部門 48位',
+      team: '全探索しか勝たん',
+      url: '', // TODO: 順位が載っているページ（公開URLが見つからなかった）
+      urlLabel: '',
+    },
+    {
+      date: '2026-07',
+      grade: '高専4年',
+      title: 'ICPC 国内予選 出場',
+      team: 'yakiimo',
+      // 353チーム中130位（4問正解）として載っている。リンク先で順位まで見える
+      url: 'https://icpc.jp/2026/domestic/results/',
+      urlLabel: '順位表',
+    },
+  ],
 
   // 連絡先。空文字にするとその行は出ない。
   // メールは公開しない方針（公開サイトに生のアドレスを置くと迷惑メールの的になるため）。
@@ -49,40 +107,4 @@ export const profile = {
     x: '', // 例: 'https://x.com/xxxx'
     zenn: '',
   },
-
-  /**
-   * できること。レベルは3段階。
-   *  'main'     … 実務/長期の制作で主に使った。人に説明できる
-   *  'used'     … 制作で使ったことがある
-   *  'learning' … 学習中・授業で触った
-   * 実態に合わせて増減させること。盛らない（面接で詰められるのは level が高い項目）
-   */
-  skills: [
-    { group: 'フロントエンド', items: [
-      { name: 'TypeScript', level: 'main' },
-      { name: 'Astro', level: 'main' },
-      { name: 'React', level: 'used' },
-      { name: 'HTML / CSS', level: 'main' },
-    ] },
-    { group: 'ゲーム開発', items: [
-      { name: 'Unity (URP)', level: 'main' },
-      { name: 'C#', level: 'main' },
-      { name: 'Mirror / ネットワーク同期', level: 'used' },
-      { name: 'Blender', level: 'used' },
-    ] },
-    { group: 'その他', items: [
-      { name: 'Git / GitHub Actions', level: 'main' },
-      { name: 'Cloudflare Pages', level: 'used' },
-      { name: 'Python', level: 'used' },
-    ] },
-  ],
 } as const;
-
-/** レベルの表示名。skills の level と対応させる */
-export const skillLevelLabel = {
-  main: '主に使った',
-  used: '使ったことがある',
-  learning: '学習中',
-} as const;
-
-export type SkillLevel = keyof typeof skillLevelLabel;
