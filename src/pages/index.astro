@@ -11,13 +11,16 @@ const works = (await getCollection('works', ({ data }) => import.meta.env.DEV ||
   (a, b) => a.data.order - b.data.order,
 );
 
-// 空文字のリンクは表示しない（公開したくない連絡先を profile.ts で空にできる作り）
-const contactLinks = [
-  { label: 'GitHub', value: profile.links.github, text: '@haruto3108' },
-  { label: 'Email', value: profile.links.email ? `mailto:${profile.links.email}` : '', text: profile.links.email },
-  { label: 'X', value: profile.links.x, text: profile.links.x.replace(/^https?:\/\//, '') },
-  { label: 'Zenn', value: profile.links.zenn, text: profile.links.zenn.replace(/^https?:\/\//, '') },
-].filter((link) => link.value !== '');
+/*
+ * SNSの行。ID が空のものは出さないので、profile.ts を空にすれば勝手に消える。
+ * URL は ID から組み立てる（profile.ts 側にURLを書かなくて済むように）
+ */
+const socialLinks = [
+  { label: 'X', id: profile.accounts.x, url: `https://x.com/${profile.accounts.x}`, text: `@${profile.accounts.x}` },
+  { label: 'GitHub', id: profile.accounts.github, url: `https://github.com/${profile.accounts.github}`, text: `@${profile.accounts.github}` },
+  { label: 'Zenn', id: profile.accounts.zenn, url: `https://zenn.dev/${profile.accounts.zenn}`, text: `@${profile.accounts.zenn}` },
+  { label: 'Email', id: profile.accounts.email, url: `mailto:${profile.accounts.email}`, text: profile.accounts.email },
+].filter((link) => link.id !== '');
 ---
 
 <Base description={profile.summary}>
@@ -112,20 +115,17 @@ const contactLinks = [
     </div>
   </section>
 
-  {/* --------------------------------------------------------------- Contact */}
-  <section id="contact" class="section">
+  {/* ---------------------------------------------------------------- Social */}
+  <section id="social" class="section">
     <div class="container">
-      <h2 class="eyebrow">Contact</h2>
-      <p class="section-lead contact-lead">
-        作ったものは GitHub で公開しています。ご連絡は下記からお願いします。
-      </p>
+      <h2 class="eyebrow">Social</h2>
 
-      <ul class="contact">
+      <ul class="social">
         {
-          contactLinks.map((link) => (
-            <li class="contact-item">
-              <span class="contact-label">{link.label}</span>
-              <a href={link.value}>{link.text}</a>
+          socialLinks.map((link) => (
+            <li class="social-item">
+              <span class="social-label">{link.label}</span>
+              <a href={link.url}>{link.text}</a>
             </li>
           ))
         }
@@ -277,17 +277,6 @@ const contactLinks = [
     padding-block: var(--space-section) 0;
   }
 
-  .section-lead {
-    max-width: var(--width-prose);
-    margin: 0;
-    color: var(--fg-muted);
-  }
-
-  /* 見出し（eyebrow）の直後に来るので、間隔をここで取る */
-  .contact-lead {
-    margin-top: 1.5rem;
-  }
-
   .works {
     margin-top: 2rem;
     /* カードの区切り線が最後にも入ると床が抜けて見えるので、最後だけ下線を足して閉じる */
@@ -381,16 +370,16 @@ const contactLinks = [
     white-space: nowrap;
   }
 
-  /* ---------------------------------------------------------------- Contact */
+  /* ----------------------------------------------------------------- Social */
 
-  .contact {
+  .social {
+    max-width: var(--width-prose);
     margin: 2rem 0 0;
     padding: 0;
     list-style: none;
-    max-width: var(--width-prose);
   }
 
-  .contact-item {
+  .social-item {
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
@@ -399,7 +388,7 @@ const contactLinks = [
     border-bottom: 1px solid var(--border);
   }
 
-  .contact-label {
+  .social-label {
     min-width: 5rem;
     font-family: var(--font-mono);
     font-size: 0.75rem;

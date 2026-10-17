@@ -98,13 +98,16 @@ export const profile = {
     },
   ],
 
-  // 連絡先。空文字にするとその行は出ない。
-  // メールは公開しない方針（公開サイトに生のアドレスを置くと迷惑メールの的になるため）。
-  // 載せたくなったら email に書けば Contact に行が増える
-  links: {
-    github: 'https://github.com/haruto3108',
-    email: '', // 例: 'you@example.com'
-    x: '', // 例: 'https://x.com/xxxx'
+  /**
+   * SNSアカウント。それぞれ **IDだけ** を書く（URLはページ側で組み立てる）。
+   * 空文字にすればその行は出ないので、載せたくないものは空のままでよい。
+   */
+  accounts: {
+    x: 'deheharn',
+    // 載せる場合は 'haruto3108' のようにIDを書く
+    github: '',
     zenn: '',
+    // メールは公開しない方針（公開サイトに生のアドレスを置くと迷惑メールの的になるため）
+    email: '',
   },
 } as const;

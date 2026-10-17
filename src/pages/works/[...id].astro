@@ -157,8 +157,15 @@ const { Content } = await render(work);
     margin: clamp(2.5rem, 6vw, 4rem) 0 0;
   }
 
+  /*
+    縦長のスクショを幅いっぱいに出すと1枚で画面を何回分も占領してしまうので、
+    高さで頭打ちにして中央に置く。横長の画像はこれまでどおり幅いっぱいになる
+  */
   .cover :global(img) {
-    width: 100%;
+    width: auto;
+    max-width: 100%;
+    max-height: 70vh;
+    margin-inline: auto;
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
   }
