@@ -84,7 +84,7 @@ export const profile = {
     {
       date: '2026-07',
       grade: '高専4年',
-      title: 'ICPC 国内予選 出場',
+      title: 'ICPC 国内予選 130位',
       team: 'yakiimo',
       // 353チーム中130位（4問正解）として載っている。リンク先で順位まで見える
       url: 'https://icpc.jp/2026/domestic/results/',
