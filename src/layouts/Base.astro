@@ -44,9 +44,6 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : As
     <meta property="og:url" content={canonical} />
     <meta property="og:site_name" content={siteName} />
     <meta name="twitter:card" content="summary_large_image" />
-    {/* TODO: OG画像（1200x630）を public/og.png に置いたら、下の2行のコメントを外す */}
-    {/* <meta property="og:image" content={`${Astro.site}og.png`} /> */}
-
     <meta name="generator" content={Astro.generator} />
     <link rel="sitemap" href={href('/sitemap-index.xml')} />
 

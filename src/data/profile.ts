@@ -19,7 +19,6 @@ export const profile = {
   /**
    * ページの説明文。検索結果とSNSカードに出る。
    * ヒーローには出していない（ヒーローは intro だけ）ので、ここを直しても見た目は変わらない。
-   * TODO: 来場者数などの数字を入れられると強い（確認できた数字だけ書くこと）
    */
   summary:
     '鈴鹿工業高等専門学校の学生です。高専祭の公式サイトを Astro で設計・運用し、' +
@@ -49,7 +48,7 @@ export const profile = {
       grade: '高専2年',
       title: 'パソコン甲子園 モバイル部門 本戦出場',
       team: '栗まんじゅう一丁目',
-      url: '', // TODO: 本選出場チームの紹介ページ（公開URLが見つからなかった）
+      url: '',
       urlLabel: '',
     },
     {
@@ -57,7 +56,7 @@ export const profile = {
       grade: '高専2年',
       title: 'パソコン甲子園 プログラミング部門 85位',
       team: '炎攻撃の肉壁BROS',
-      url: '', // TODO: 順位が載っているページ（公開URLが見つからなかった）
+      url: '',
       urlLabel: '',
     },
     {
@@ -65,12 +64,10 @@ export const profile = {
       grade: '高専2年',
       title: '鈴鹿高専ビジネスコンテスト 企業賞',
       team: 'あ',
-      url: '', // TODO: 受賞が分かるページ
+      url: '',
       urlLabel: '',
     },
     {
-      // TODO: 合格月が未確定。「2025年前半」とのことなので 3月で仮置きしている。
-      //       4月以降なら grade を '高専3年' に直すこと
       date: '2025-03',
       grade: '高専2年',
       title: '基本情報技術者試験 合格',
@@ -84,7 +81,7 @@ export const profile = {
       grade: '高専3年',
       title: 'パソコン甲子園 プログラミング部門 48位',
       team: '全探索しか勝たん',
-      url: '', // TODO: 順位が載っているページ（公開URLが見つからなかった）
+      url: '',
       urlLabel: '',
     },
     {
