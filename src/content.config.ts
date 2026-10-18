@@ -28,6 +28,9 @@ const works = defineCollection({
       // 未設定のうちはプレースホルダが出る
       cover: image().optional(),
       coverAlt: z.string().optional(),
+      // 紹介動画。public/ 直下からのパスで書く（例: '/video/xxx.mp4'）。
+      // 設定すると詳細ページの先頭が画像ではなく動画になり、cover はその静止画として使われる
+      video: z.string().optional(),
       // 一覧での並び順（小さいほど先）。見せたい順に手で決める
       order: z.number().default(99),
       // 下書き。true の間は本番ビルドに出さない

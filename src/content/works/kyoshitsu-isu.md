@@ -3,6 +3,9 @@ title: この教室、なんか椅子多くない？
 tagline: 鈴鹿高専を舞台にした4人対戦のかくれんぼゲーム
 tags: ['Unity', 'C#', 'Blender']
 links:
+cover: ./images/kyoshitsu-isu-title.jpg
+coverAlt: タイトル画面。教室の椅子と机が宙に散らばる背景に「この教室椅子が多くない？」のロゴと、ひとりで遊ぶ／通信プレイのボタンが並ぶ
+video: /video/kyoshitsu-isu-intro.mp4
 order: 1
 ---
 

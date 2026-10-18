@@ -23,7 +23,7 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths;
 
 const { work, prev, next } = Astro.props;
-const { title, tagline, tags, links, cover, coverAlt } = work.data;
+const { title, tagline, tags, links, cover, coverAlt, video } = work.data;
 const { Content } = await render(work);
 ---
 
@@ -57,10 +57,23 @@ const { Content } = await render(work);
       </header>
 
       {
-        cover && (
+        /*
+          紹介動画があればそれを主役にし、カバー画像は再生前に出す静止画として使う。
+          preload="metadata" なのは、開いただけで数MBを落とさないため（長さと寸法だけ先に取る）
+        */
+        video ? (
           <figure class="cover">
-            <Image src={cover} alt={coverAlt ?? ''} widths={[640, 1024, 1600]} loading="eager" />
+            <video controls preload="metadata" poster={cover?.src} playsinline>
+              <source src={href(video)} type="video/mp4" />
+              この動画を再生できないブラウザのようです。
+            </video>
           </figure>
+        ) : (
+          cover && (
+            <figure class="cover">
+              <Image src={cover} alt={coverAlt ?? ''} widths={[640, 1024, 1600]} loading="eager" />
+            </figure>
+          )
         )
       }
 
@@ -161,6 +174,15 @@ const { Content } = await render(work);
     縦長のスクショを幅いっぱいに出すと1枚で画面を何回分も占領してしまうので、
     高さで頭打ちにして中央に置く。横長の画像はこれまでどおり幅いっぱいになる
   */
+  .cover :global(video) {
+    display: block;
+    width: 100%;
+    max-height: 70vh;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: #000;
+  }
+
   .cover :global(img) {
     width: auto;
     max-width: 100%;
